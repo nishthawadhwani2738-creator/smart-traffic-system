@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ResQFlow AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #07111f;
+            color: white;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+
+        header {
+            padding: 22px 35px;
+            background: #0b1728;
+            border-bottom: 1px solid #24364f;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .logo span {
+            color: #00e5ff;
+        }
+
+        .subtitle {
+            color: #8fa5bf;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
+        .status {
+            background: #0b2d25;
+            color: #38f2a3;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        /* MAIN */
+
+        .container {
+            padding: 25px 35px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: #0d1b2e;
+            border: 1px solid #203650;
+            border-radius: 15px;
+            padding: 22px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            font-size: 17px;
+            margin-bottom: 18px;
+        }
+
+        /* EMERGENCY */
+
+        .emergency-box {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .ambulance {
+            font-size: 65px;
+        }
+
+        .emergency-info p {
+            margin: 7px 0;
+            color: #a9bad0;
+        }
+
+        .high {
+            color: #ff4d5a !important;
+            font-weight: bold;
+        }
+
+        /* AI */
+
+        .ai-box {
+            border-left: 4px solid #00e5ff;
+            padding-left: 15px;
+        }
+
+        .ai-title {
+            color: #00e5ff;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .ai-box p {
+            color: #b4c5d9;
+            line-height: 1.6;
+        }
+
+        /* MAP */
+
+        .map-card {
+            margin-top: 20px;
+        }
+
+        .road {
+            height: 150px;
+            background: #111f31;
+            border-radius: 15px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            overflow: hidden;
+        }
+
+        .road-line {
+            position: absolute;
+            width: 85%;
+            height: 5px;
+            background: #65758a;
+        }
+
+        .signal {
+            z-index: 2;
+            background: #18283c;
+            padding: 13px;
+            border-radius: 12px;
+            text-align: center;
+            width: 100px;
+        }
+
+        .signal-name {
+            font-size: 12px;
+            color: #9fb1c7;
+            margin-bottom: 8px;
+        }
+
+        .light {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            margin: 5px auto;
+            background: #3a4654;
+        }
+
+        .red.active {
+            background: #ff3949;
+            box-shadow: 0 0 15px #ff3949;
+        }
+
+        .yellow.active {
+            background: #ffc107;
+            box-shadow: 0 0 15px #ffc107;
+        }
+
+        .green.active {
+            background: #20e88a;
+            box-shadow: 0 0 15px #20e88a;
+        }
+
+        .ambulance-map {
+            position: absolute;
+            font-size: 32px;
+            left: 5%;
+            transition: left 1s linear;
+            z-index: 5;
+        }
+
+        /* TRAFFIC */
+
+        .traffic-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .traffic-item {
+            background: #111f31;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .traffic-item h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .percentage {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .bar {
+            height: 8px;
+            background: #26384f;
+            border-radius: 10px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .fill {
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .low {
+            width: 30%;
+            background: #20e88a;
+        }
+
+        .medium {
+            width: 55%;
+            background: #ffc107;
+        }
+
+        .heavy {
+            width: 82%;
+            background: #ff4d5a;
+        }
+
+        /* LOG */
+
+        .log {
+            height: 180px;
+            overflow-y: auto;
+            background: #07111f;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .log p {
+            margin-bottom: 9px;
+            color: #91a7bf;
+            font-size: 13px;
+        }
+
+        .log strong {
+            color: #00e5ff;
+        }
+
+        /* BUTTONS */
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            border: none;
+            padding: 13px 20px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .emergency-btn {
+            background: #ff4050;
+            color: white;
+        }
+
+        .traffic-btn {
+            background: #ffc107;
+            color: #111;
+        }
+
+        button:hover {
+            transform: scale(1.03);
+        }
+
+        /* FOOTER */
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #60748c;
+            font-size: 12px;
+        }
+
+        @media(max-width: 800px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .traffic-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+
+    <div>
+        <div class="logo">🚑 ResQ<span>Flow</span> AI</div>
+        <div class="subtitle">
+            Intelligent Emergency Traffic Management
+        </div>
+    </div>
+
+    <div class="status" id="systemStatus">
+        ● SYSTEM ONLINE
+    </div>
+
+</header>
+
+
+<div class="container">
+
+    <!-- TOP CARDS -->
+
+    <div class="grid">
+
+        <!-- EMERGENCY VEHICLE -->
+
+        <div class="card">
+
+            <h2>🚨 Emergency Vehicle</h2>
+
+            <div class="emergency-box">
+
+                <div class="ambulance">
+                    🚑
+                </div>
+
+                <div class="emergency-info">
+
+                    <p>
+                        Status:
+                        <span id="vehicleStatus">STANDBY</span>
+                    </p>
+
+                    <p>
+                        Vehicle:
+                        Ambulance
+                    </p>
+
+                    <p>
+                        ETA:
+                        <strong id="eta">--</strong>
+                    </p>
+
+                    <p>
+                        Priority:
+                        <span class="high">HIGH</span>
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- AI DECISION -->
+
+        <div class="card">
+
+            <h2>🤖 AI Decision Engine</h2>
+
+            <div class="ai-box">
+
+                <div class="ai-title" id="decisionTitle">
+                    SYSTEM READY
+                </div>
+
+                <p id="decisionText">
+                    Waiting for emergency vehicle detection.
+                    Traffic conditions are being monitored.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- TRAFFIC MAP -->
+
+    <div class="card map-card">
+
+        <h2>🗺️ Live Traffic Network</h2>
+
+        <div class="road">
+
+            <div class="road-line"></div>
+
+            <div class="ambulance-map" id="mapAmbulance">
+                🚑
+            </div>
+
+
+            <!-- SIGNAL 1 -->
+
+            <div class="signal">
+
+                <div class="signal-name">
+                    SIGNAL 1
+                </div>
+
+                <div class="light red active" id="s1red"></div>
+                <div class="light yellow" id="s1yellow"></div>
+                <div class="light green" id="s1green"></div>
+
+            </div>
+
+
+            <!-- SIGNAL 2 -->
+
+            <div class="signal">
+
+                <div class="signal-name">
+                    SIGNAL 2
+                </div>
+
+                <div class="light red active" id="s2red"></div>
+                <div class="light yellow" id="s2yellow"></div>
+                <div class="light green" id="s2green"></div>
+
+            </div>
+
+
+            <!-- SIGNAL 3 -->
+
+            <div class="signal">
+
+                <div class="signal-name">
+                    SIGNAL 3
+                </div>
+
+                <div class="light red active" id="s3red"></div>
+                <div class="light yellow" id="s3yellow"></div>
+                <div class="light green" id="s3green"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- TRAFFIC DENSITY -->
+
+    <div class="card map-card">
+
+        <h2>📊 Real-Time Traffic Density</h2>
+
+        <div class="traffic-grid">
+
+            <div class="traffic-item">
+
+                <h3>Signal 1</h3>
+
+                <div class="percentage">
+                    30%
+                </div>
+
+                <div class="bar">
+                    <div class="fill low"></div>
+                </div>
+
+                <small>LOW TRAFFIC</small>
+
+            </div>
+
+
+            <div class="traffic-item">
+
+                <h3>Signal 2</h3>
+
+                <div class="percentage" id="s2Traffic">
+                    82%
+                </div>
+
+                <div class="bar">
+                    <div class="fill heavy" id="s2Bar"></div>
+                </div>
+
+                <small id="s2TrafficText">
+                    HEAVY TRAFFIC
+                </small>
+
+            </div>
+
+
+            <div class="traffic-item">
+
+                <h3>Signal 3</h3>
+
+                <div class="percentage">
+                    45%
+                </div>
+
+                <div class="bar">
+                    <div class="fill medium"></div>
+                </div>
+
+                <small>MEDIUM TRAFFIC</small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- LOG -->
+
+    <div class="card map-card">
+
+        <h2>📋 Live System Log</h2>
+
+        <div class="log" id="systemLog">
+
+            <p>
+                <strong>00:00:01</strong>
+                System initialized.
+            </p>
+
+            <p>
+                <strong>00:00:02</strong>
+                Traffic sensors connected.
+            </p>
+
+            <p>
+                <strong>00:00:03</strong>
+                AI decision engine ready.
+            </p>
+
+        </div>
+
+
+        <div class="buttons">
+
+            <button
+                class="emergency-btn"
+                onclick="simulateEmergency()">
+
+                🚨 SIMULATE EMERGENCY
+
+            </button>
+
+
+            <button
+                class="traffic-btn"
+                onclick="simulateTraffic()">
+
+                ⚠️ SIMULATE HEAVY TRAFFIC
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<footer>
+
+    ResQFlow AI • Smart Emergency Traffic Signal Automation
+
+</footer>
+
+
+<script>
+
+    let emergencyActive = false;
+
+    function addLog(message) {
+
+        const log = document.getElementById("systemLog");
+
+        const time = new Date().toLocaleTimeString();
+
+        const newLog = document.createElement("p");
+
+        newLog.innerHTML =
+            "<strong>" + time + "</strong> " + message;
+
+        log.appendChild(newLog);
+
+        log.scrollTop = log.scrollHeight;
+    }
+
+
+    function setSignal(signal, colour) {
+
+        document.getElementById(signal + "red")
+            .classList.remove("active");
+
+        document.getElementById(signal + "yellow")
+            .classList.remove("active");
+
+        document.getElementById(signal + "green")
+            .classList.remove("active");
+
+        document.getElementById(signal + colour)
+            .classList.add("active");
+
+    }
+
+
+    function simulateEmergency() {
+
+        if (emergencyActive) return;
+
+        emergencyActive = true;
+
+        document.getElementById("systemStatus")
+            .innerText = "🔴 EMERGENCY MODE ACTIVE";
+
+        document.getElementById("vehicleStatus")
+            .innerText = "DETECTED";
+
+        document.getElementById("eta")
+            .innerText = "42 seconds";
+
+        document.getElementById("decisionTitle")
+            .innerText = "EMERGENCY ROUTE ACTIVATED";
+
+        document.getElementById("decisionText")
+            .innerText =
+            "Ambulance detected. S2 has heavy traffic. " +
+            "AI is preparing an adaptive green corridor " +
+            "instead of blindly opening the intersection.";
+
+        addLog("🚑 Emergency vehicle detected.");
+
+        setTimeout(() => {
+
+            addLog("📍 Route calculated: S1 → S2 → S3.");
+
+            setSignal("s1", "green");
+
+        }, 1000);
+
+
+        setTimeout(() => {
+
+            addLog("📊 Heavy congestion detected at S2.");
+
+            setSignal("s2", "yellow");
+
+        }, 2000);
+
+
+        setTimeout(() => {
+
+            addLog("🤖 AI optimizing signal timing.");
+
+            setSignal("s2", "green");
+
+        }, 4000);
+
+
+        setTimeout(() => {
+
+            addLog("🟢 Emergency corridor activated.");
+
+            setSignal("s3", "green");
+
+        }, 6000);
+
+
+        setTimeout(() => {
+
+            document.getElementById("mapAmbulance")
+                .style.left = "82%";
+
+            addLog("🚑 Ambulance moving through emergency corridor.");
+
+        }, 7000);
+
+
+        setTimeout(() => {
+
+            addLog("✅ Ambulance cleared the route.");
+
+            document.getElementById("vehicleStatus")
+                .innerText = "CLEARED";
+
+            document.getElementById("eta")
+                .innerText = "ARRIVED";
+
+        }, 10000);
+
+
+        setTimeout(() => {
+
+            setSignal("s1", "red");
+            setSignal("s2", "red");
+            setSignal("s3", "red");
+
+            document.getElementById("systemStatus")
+                .innerText = "● SYSTEM ONLINE";
+
+            document.getElementById("decisionTitle")
+                .innerText = "NORMAL TRAFFIC RESTORED";
+
+            document.getElementById("decisionText")
+                .innerText =
+                    "Emergency vehicle cleared. " +
+                    "Traffic signals have returned to normal operation.";
+
+            addLog("🔄 Normal traffic operation restored.");
+
+            emergencyActive = false;
+
+        }, 13000);
+
+    }
+
+
+    function simulateTraffic() {
+
+        document.getElementById("s2Traffic")
+            .innerText = "95%";
+
+        document.getElementById("s2Bar")
+            .style.width = "95%";
+
+        document.getElementById("s2TrafficText")
+            .innerText = "SEVERE CONGESTION";
+
+        document.getElementById("decisionTitle")
+            .innerText = "⚠️ CONGESTION DETECTED";
+
+        document.getElementById("decisionText")
+            .innerText =
+                "Signal 2 has severe traffic congestion. " +
+                "The AI will delay the green phase and " +
+                "prepare an emergency lane before the ambulance arrives.";
+
+        addLog("⚠️ Severe congestion detected at Signal 2.");
+
+    }
+
+</script>
+
+</body>
+</html>
