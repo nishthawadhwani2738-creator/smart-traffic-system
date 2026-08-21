@@ -1,778 +1,621 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoRescue // Smart Emergency Traffic System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap');
 
-    <title>ResQFlow AI</title>
+  :root{
+    --bg:#0A0D13;
+    --panel:#10141D;
+    --panel-2:#141924;
+    --line:#232B3A;
+    --line-soft:#1B212C;
+    --text:#DCE3EE;
+    --text-dim:#7E8AA0;
+    --amber:#F5A623;
+    --red:#F0453A;
+    --green:#3ECF6E;
+    --cyan:#43D9C8;
+  }
 
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, Helvetica, sans-serif;
-        }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(67,217,200,0.07), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(245,166,35,0.05), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding:30px 28px 60px;
+  }
 
-        body {
-            background: #07111f;
-            color: white;
-            min-height: 100vh;
-        }
+  .mono{font-family:'Space Mono',monospace;}
 
-        /* HEADER */
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:16px;
+    max-width:1200px;
+    margin:0 auto 28px;
+    padding-bottom:20px;
+    border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand-mark{
+    width:38px; height:38px;
+    border-radius:10px;
+    background:linear-gradient(135deg, var(--cyan), #2a9d90);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Mono',monospace;
+    font-weight:700;
+    font-size:14px;
+    color:#06110f;
+    flex-shrink:0;
+  }
+  h1{
+    font-family:'Inter',sans-serif;
+    font-weight:800;
+    font-size:22px;
+    margin:0;
+    letter-spacing:-0.3px;
+    color:#fff;
+  }
+  h1 span{
+    display:block;
+    font-family:'Space Mono',monospace;
+    font-weight:400;
+    font-size:11px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    margin-top:4px;
+  }
 
-        header {
-            padding: 22px 35px;
-            background: #0b1728;
-            border-bottom: 1px solid #24364f;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+  .clock{
+    font-family:'Space Mono',monospace;
+    text-align:right;
+    color:var(--text-dim);
+    font-size:12px;
+  }
+  .clock .status-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:7px 14px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:600;
+    color:var(--green);
+    margin-bottom:8px;
+  }
+  .status-pill .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 8px var(--green);
+    animation:pulse 1.6s infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
 
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
-        }
+  main{
+    max-width:1200px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:1.15fr 0.85fr;
+    gap:22px;
+  }
+  @media(max-width:920px){ main{grid-template-columns:1fr;} }
 
-        .logo span {
-            color: #00e5ff;
-        }
+  .panel{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:22px;
+  }
+  .panel-title{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    margin-bottom:16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .panel-title b{color:#fff; font-weight:700;}
 
-        .subtitle {
-            color: #8fa5bf;
-            margin-top: 5px;
-            font-size: 13px;
-        }
+  .stage-wrap{position:relative; border-radius:10px; overflow:hidden;}
+  svg{width:100%; height:auto; display:block;}
 
-        .status {
-            background: #0b2d25;
-            color: #38f2a3;
-            padding: 10px 18px;
-            border-radius: 20px;
-            font-size: 13px;
-        }
+  .btn-row{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;}
+  button{
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.5px;
+    background:var(--panel-2);
+    color:var(--text);
+    border:1px solid var(--line);
+    padding:12px 18px;
+    border-radius:9px;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  button:hover{border-color:var(--cyan); color:#fff;}
+  button:disabled{opacity:.35; cursor:not-allowed;}
+  button.primary{
+    background:var(--red);
+    border-color:var(--red);
+    color:#fff;
+    font-weight:700;
+  }
+  button.primary:hover{background:#ff5c4f; border-color:#ff5c4f;}
+  button.reset{color:var(--text-dim);}
 
-        /* MAIN */
+  /* --- Phase console --- */
+  .phase-list{display:flex; flex-direction:column; gap:8px;}
+  .phase-item{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1px solid var(--line-soft);
+    background:#0C1017;
+    opacity:.42;
+    transition:all .25s ease;
+  }
+  .phase-item.active{
+    opacity:1;
+    border-color:var(--cyan);
+    background:rgba(67,217,200,0.08);
+    box-shadow:0 0 0 1px rgba(67,217,200,0.2) inset;
+  }
+  .phase-item.done{opacity:.6;}
+  .phase-item.done .phase-num{color:var(--green); border-color:var(--green);}
+  .phase-num{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    font-weight:700;
+    color:var(--text-dim);
+    border:1px solid var(--line);
+    border-radius:50%;
+    width:22px;height:22px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .phase-item.active .phase-num{color:var(--cyan); border-color:var(--cyan);}
+  .phase-title{font-weight:700; font-size:13px; color:#fff; letter-spacing:0.1px;}
+  .phase-desc{font-size:11.5px; color:var(--text-dim); margin-top:3px; line-height:1.5;}
 
-        .container {
-            padding: 25px 35px;
-        }
+  .live-status{
+    margin-top:16px;
+    padding:14px 16px;
+    border-radius:10px;
+    background:#0C1017;
+    border:1px solid var(--line-soft);
+    border-left:3px solid var(--cyan);
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    font-weight:700;
+    color:var(--cyan);
+    min-height:18px;
+  }
 
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
+  /* --- Log --- */
+  .log-panel{margin-top:22px;}
+  .log-list{
+    max-height:180px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column-reverse;
+    gap:2px;
+    font-family:'Space Mono',monospace;
+    font-size:11.5px;
+    background:#0C1017;
+    border:1px solid var(--line-soft);
+    border-radius:10px;
+    padding:6px 12px;
+  }
+  .log-entry{
+    display:flex;
+    gap:12px;
+    color:var(--text);
+    padding:6px 0;
+    border-bottom:1px solid var(--line-soft);
+  }
+  .log-entry:first-child{border-bottom:none;}
+  .log-entry .t{color:#4d5a6e; flex-shrink:0;}
+  .log-entry.warn{color:var(--amber); font-weight:700;}
+  .log-entry.crit{color:var(--red); font-weight:700;}
+  .log-entry.ok{color:var(--green); font-weight:700;}
 
-        .card {
-            background: #0d1b2e;
-            border: 1px solid #203650;
-            border-radius: 15px;
-            padding: 22px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .card h2 {
-            font-size: 17px;
-            margin-bottom: 18px;
-        }
-
-        /* EMERGENCY */
-
-        .emergency-box {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .ambulance {
-            font-size: 65px;
-        }
-
-        .emergency-info p {
-            margin: 7px 0;
-            color: #a9bad0;
-        }
-
-        .high {
-            color: #ff4d5a !important;
-            font-weight: bold;
-        }
-
-        /* AI */
-
-        .ai-box {
-            border-left: 4px solid #00e5ff;
-            padding-left: 15px;
-        }
-
-        .ai-title {
-            color: #00e5ff;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .ai-box p {
-            color: #b4c5d9;
-            line-height: 1.6;
-        }
-
-        /* MAP */
-
-        .map-card {
-            margin-top: 20px;
-        }
-
-        .road {
-            height: 150px;
-            background: #111f31;
-            border-radius: 15px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-            overflow: hidden;
-        }
-
-        .road-line {
-            position: absolute;
-            width: 85%;
-            height: 5px;
-            background: #65758a;
-        }
-
-        .signal {
-            z-index: 2;
-            background: #18283c;
-            padding: 13px;
-            border-radius: 12px;
-            text-align: center;
-            width: 100px;
-        }
-
-        .signal-name {
-            font-size: 12px;
-            color: #9fb1c7;
-            margin-bottom: 8px;
-        }
-
-        .light {
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            margin: 5px auto;
-            background: #3a4654;
-        }
-
-        .red.active {
-            background: #ff3949;
-            box-shadow: 0 0 15px #ff3949;
-        }
-
-        .yellow.active {
-            background: #ffc107;
-            box-shadow: 0 0 15px #ffc107;
-        }
-
-        .green.active {
-            background: #20e88a;
-            box-shadow: 0 0 15px #20e88a;
-        }
-
-        .ambulance-map {
-            position: absolute;
-            font-size: 32px;
-            left: 5%;
-            transition: left 1s linear;
-            z-index: 5;
-        }
-
-        /* TRAFFIC */
-
-        .traffic-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-        }
-
-        .traffic-item {
-            background: #111f31;
-            padding: 15px;
-            border-radius: 10px;
-        }
-
-        .traffic-item h3 {
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .percentage {
-            font-size: 25px;
-            font-weight: bold;
-        }
-
-        .bar {
-            height: 8px;
-            background: #26384f;
-            border-radius: 10px;
-            margin-top: 10px;
-            overflow: hidden;
-        }
-
-        .fill {
-            height: 100%;
-            border-radius: 10px;
-        }
-
-        .low {
-            width: 30%;
-            background: #20e88a;
-        }
-
-        .medium {
-            width: 55%;
-            background: #ffc107;
-        }
-
-        .heavy {
-            width: 82%;
-            background: #ff4d5a;
-        }
-
-        /* LOG */
-
-        .log {
-            height: 180px;
-            overflow-y: auto;
-            background: #07111f;
-            border-radius: 10px;
-            padding: 15px;
-        }
-
-        .log p {
-            margin-bottom: 9px;
-            color: #91a7bf;
-            font-size: 13px;
-        }
-
-        .log strong {
-            color: #00e5ff;
-        }
-
-        /* BUTTONS */
-
-        .buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        button {
-            border: none;
-            padding: 13px 20px;
-            border-radius: 9px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .emergency-btn {
-            background: #ff4050;
-            color: white;
-        }
-
-        .traffic-btn {
-            background: #ffc107;
-            color: #111;
-        }
-
-        button:hover {
-            transform: scale(1.03);
-        }
-
-        /* FOOTER */
-
-        footer {
-            text-align: center;
-            padding: 25px;
-            color: #60748c;
-            font-size: 12px;
-        }
-
-        @media(max-width: 800px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-
-            .traffic-grid {
-                grid-template-columns: 1fr;
-            }
-
-            header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
-            }
-
-            .container {
-                padding: 20px;
-            }
-        }
-    </style>
+  footer{
+    max-width:1200px;
+    margin:26px auto 0;
+    color:var(--text-dim);
+    font-size:11.5px;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+</style>
 </head>
-
 <body>
 
 <header>
-
+  <div class="brand">
+    <div class="brand-mark">GR</div>
     <div>
-        <div class="logo">🚑 ResQ<span>Flow</span> AI</div>
-        <div class="subtitle">
-            Intelligent Emergency Traffic Management
-        </div>
+      <h1>GoRescue <span>Smart Emergency Traffic System</span></h1>
     </div>
-
-    <div class="status" id="systemStatus">
-        ● SYSTEM ONLINE
-    </div>
-
+  </div>
+  <div class="clock">
+    <div class="status-pill"><span class="dot"></span> SYSTEM NOMINAL</div>
+    <div id="sim-clock">00:00:00</div>
+  </div>
 </header>
 
+<main>
 
-<div class="container">
-
-    <!-- TOP CARDS -->
-
-    <div class="grid">
-
-        <!-- EMERGENCY VEHICLE -->
-
-        <div class="card">
-
-            <h2>🚨 Emergency Vehicle</h2>
-
-            <div class="emergency-box">
-
-                <div class="ambulance">
-                    🚑
-                </div>
-
-                <div class="emergency-info">
-
-                    <p>
-                        Status:
-                        <span id="vehicleStatus">STANDBY</span>
-                    </p>
-
-                    <p>
-                        Vehicle:
-                        Ambulance
-                    </p>
-
-                    <p>
-                        ETA:
-                        <strong id="eta">--</strong>
-                    </p>
-
-                    <p>
-                        Priority:
-                        <span class="high">HIGH</span>
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- AI DECISION -->
-
-        <div class="card">
-
-            <h2>🤖 AI Decision Engine</h2>
-
-            <div class="ai-box">
-
-                <div class="ai-title" id="decisionTitle">
-                    SYSTEM READY
-                </div>
-
-                <p id="decisionText">
-                    Waiting for emergency vehicle detection.
-                    Traffic conditions are being monitored.
-                </p>
-
-            </div>
-
-        </div>
-
+  <!-- INTERSECTION VIEW -->
+  <section class="panel">
+    <div class="panel-title">
+      <span><b>Intersection 04</b> — Live View</span>
+      <span id="mode-tag" class="mono" style="color:var(--text-dim);">MODE: AUTO</span>
     </div>
 
+    <div class="stage-wrap">
+      <svg viewBox="0 0 600 600" id="stage">
+        <!-- roads -->
+        <rect x="0" y="230" width="600" height="140" fill="#171D29"/>
+        <rect x="230" y="0" width="140" height="600" fill="#171D29"/>
+        <!-- lane dashes -->
+        <g stroke="#39435a" stroke-width="3" stroke-dasharray="14 12">
+          <line x1="0" y1="300" x2="230" y2="300"/>
+          <line x1="370" y1="300" x2="600" y2="300"/>
+          <line x1="300" y1="0" x2="300" y2="230"/>
+          <line x1="300" y1="370" x2="300" y2="600"/>
+        </g>
+        <!-- intersection box -->
+        <rect x="230" y="230" width="140" height="140" fill="#1D2534" stroke="#2c3648" stroke-width="2"/>
 
-    <!-- TRAFFIC MAP -->
+        <!-- traffic lights -->
+        <g id="light-N" transform="translate(263,192)">
+          <rect x="0" y="0" width="26" height="32" rx="6" fill="#0c111a" stroke="#2c3648"/>
+          <circle class="bulb" cx="13" cy="10" r="5.5" fill="#3a1414"/>
+          <circle class="bulb-g" cx="13" cy="22" r="5.5" fill="#123a1e"/>
+        </g>
+        <g id="light-S" transform="translate(311,376)">
+          <rect x="0" y="0" width="26" height="32" rx="6" fill="#0c111a" stroke="#2c3648"/>
+          <circle class="bulb" cx="13" cy="10" r="5.5" fill="#3a1414"/>
+          <circle class="bulb-g" cx="13" cy="22" r="5.5" fill="#123a1e"/>
+        </g>
+        <g id="light-E" transform="translate(376,263)">
+          <rect x="0" y="0" width="32" height="26" rx="6" fill="#0c111a" stroke="#2c3648"/>
+          <circle class="bulb" cx="10" cy="13" r="5.5" fill="#3a1414"/>
+          <circle class="bulb-g" cx="22" cy="13" r="5.5" fill="#123a1e"/>
+        </g>
+        <g id="light-W" transform="translate(192,311)">
+          <rect x="0" y="0" width="32" height="26" rx="6" fill="#0c111a" stroke="#2c3648"/>
+          <circle class="bulb" cx="10" cy="13" r="5.5" fill="#3a1414"/>
+          <circle class="bulb-g" cx="22" cy="13" r="5.5" fill="#123a1e"/>
+        </g>
 
-    <div class="card map-card">
+        <!-- North queue (ahead of ambulance) -->
+        <g id="cars-N">
+          <rect class="car" x="252" y="160" width="28" height="18" rx="4" fill="#E8B23E"/>
+          <rect class="car" x="252" y="122" width="28" height="18" rx="4" fill="#8DA1C4"/>
+          <rect class="car" x="252" y="84"  width="28" height="18" rx="4" fill="#5FB18C"/>
+          <rect class="car" x="320" y="160" width="28" height="18" rx="4" fill="#C77DBB"/>
+          <rect class="car" x="320" y="122" width="28" height="18" rx="4" fill="#8DA1C4"/>
+        </g>
 
-        <h2>🗺️ Live Traffic Network</h2>
+        <!-- South queue -->
+        <g id="cars-S">
+          <rect class="car" x="252" y="422" width="28" height="18" rx="4" fill="#8DA1C4"/>
+          <rect class="car" x="252" y="460" width="28" height="18" rx="4" fill="#E8B23E"/>
+          <rect class="car" x="320" y="422" width="28" height="18" rx="4" fill="#5FB18C"/>
+        </g>
 
-        <div class="road">
+        <!-- East queue -->
+        <g id="cars-E">
+          <rect class="car" x="410" y="252" width="18" height="28" rx="4" fill="#8DA1C4"/>
+          <rect class="car" x="448" y="252" width="18" height="28" rx="4" fill="#C77DBB"/>
+          <rect class="car" x="410" y="320" width="18" height="28" rx="4" fill="#E8B23E"/>
+          <rect class="car" x="448" y="320" width="18" height="28" rx="4" fill="#5FB18C"/>
+        </g>
+        <!-- West queue -->
+        <g id="cars-W">
+          <rect class="car" x="134" y="252" width="18" height="28" rx="4" fill="#5FB18C"/>
+          <rect class="car" x="96"  y="252" width="18" height="28" rx="4" fill="#8DA1C4"/>
+          <rect class="car" x="134" y="320" width="18" height="28" rx="4" fill="#E8B23E"/>
+          <rect class="car" x="96"  y="320" width="18" height="28" rx="4" fill="#C77DBB"/>
+        </g>
 
-            <div class="road-line"></div>
+        <!-- ambulance: larger, high-contrast, marked -->
+        <g id="ambulance" transform="translate(258,-70)" opacity="0">
+          <rect x="0" y="0" width="46" height="36" rx="5" fill="#F4F6FA" stroke="#B9C2D0" stroke-width="1"/>
+          <rect x="0" y="0" width="46" height="11" rx="3" fill="#F0453A"/>
+          <rect x="18" y="13" width="10" height="18" fill="#F0453A"/>
+          <rect x="9" y="18" width="28" height="7" fill="#F0453A"/>
+          <text x="23" y="30" text-anchor="middle" font-family="Space Mono, monospace" font-size="7" font-weight="700" fill="#F0453A">AMB</text>
+          <circle id="amb-beacon" cx="8" cy="5" r="4" fill="#43D9C8"/>
+          <circle id="amb-beacon2" cx="38" cy="5" r="4" fill="#F0453A"/>
+        </g>
 
-            <div class="ambulance-map" id="mapAmbulance">
-                🚑
-            </div>
-
-
-            <!-- SIGNAL 1 -->
-
-            <div class="signal">
-
-                <div class="signal-name">
-                    SIGNAL 1
-                </div>
-
-                <div class="light red active" id="s1red"></div>
-                <div class="light yellow" id="s1yellow"></div>
-                <div class="light green" id="s1green"></div>
-
-            </div>
-
-
-            <!-- SIGNAL 2 -->
-
-            <div class="signal">
-
-                <div class="signal-name">
-                    SIGNAL 2
-                </div>
-
-                <div class="light red active" id="s2red"></div>
-                <div class="light yellow" id="s2yellow"></div>
-                <div class="light green" id="s2green"></div>
-
-            </div>
-
-
-            <!-- SIGNAL 3 -->
-
-            <div class="signal">
-
-                <div class="signal-name">
-                    SIGNAL 3
-                </div>
-
-                <div class="light red active" id="s3red"></div>
-                <div class="light yellow" id="s3yellow"></div>
-                <div class="light green" id="s3green"></div>
-
-            </div>
-
-        </div>
-
+        <!-- detection radius indicator -->
+        <circle id="radar" cx="300" cy="300" r="0" fill="none" stroke="#43D9C8" stroke-width="1.5" opacity="0"/>
+      </svg>
     </div>
 
+    <div class="btn-row">
+      <button class="primary" id="trigger-btn">🚨 Simulate Approaching Ambulance</button>
+      <button class="reset" id="reset-btn">Reset Intersection</button>
+    </div>
+  </section>
 
-    <!-- TRAFFIC DENSITY -->
+  <!-- PHASE CONSOLE -->
+  <section class="panel">
+    <div class="panel-title"><span><b>Emergency Corridor</b> Protocol</span></div>
 
-    <div class="card map-card">
-
-        <h2>📊 Real-Time Traffic Density</h2>
-
-        <div class="traffic-grid">
-
-            <div class="traffic-item">
-
-                <h3>Signal 1</h3>
-
-                <div class="percentage">
-                    30%
-                </div>
-
-                <div class="bar">
-                    <div class="fill low"></div>
-                </div>
-
-                <small>LOW TRAFFIC</small>
-
-            </div>
-
-
-            <div class="traffic-item">
-
-                <h3>Signal 2</h3>
-
-                <div class="percentage" id="s2Traffic">
-                    82%
-                </div>
-
-                <div class="bar">
-                    <div class="fill heavy" id="s2Bar"></div>
-                </div>
-
-                <small id="s2TrafficText">
-                    HEAVY TRAFFIC
-                </small>
-
-            </div>
-
-
-            <div class="traffic-item">
-
-                <h3>Signal 3</h3>
-
-                <div class="percentage">
-                    45%
-                </div>
-
-                <div class="bar">
-                    <div class="fill medium"></div>
-                </div>
-
-                <small>MEDIUM TRAFFIC</small>
-
-            </div>
-
+    <div class="phase-list" id="phase-list">
+      <div class="phase-item" data-phase="0">
+        <div class="phase-num">•</div>
+        <div>
+          <div class="phase-title">Standby</div>
+          <div class="phase-desc">Normal fixed-time cycle. No emergency vehicle detected.</div>
         </div>
-
+      </div>
+      <div class="phase-item" data-phase="1">
+        <div class="phase-num">1</div>
+        <div>
+          <div class="phase-title">Detection</div>
+          <div class="phase-desc">Emergency vehicle confirmed on North approach, ~500m out.</div>
+        </div>
+      </div>
+      <div class="phase-item" data-phase="2">
+        <div class="phase-num">2</div>
+        <div>
+          <div class="phase-title">Clearing Phase</div>
+          <div class="phase-desc">North held green to flush queued traffic ahead of the vehicle.</div>
+        </div>
+      </div>
+      <div class="phase-item" data-phase="3">
+        <div class="phase-num">3</div>
+        <div>
+          <div class="phase-title">Cross-Traffic Hold</div>
+          <div class="phase-desc">East &amp; West forced red. No vehicle can cut across the path.</div>
+        </div>
+      </div>
+      <div class="phase-item" data-phase="4">
+        <div class="phase-num">4</div>
+        <div>
+          <div class="phase-title">Corridor Open</div>
+          <div class="phase-desc">Lane fully clear — vehicle passes through uninterrupted.</div>
+        </div>
+      </div>
+      <div class="phase-item" data-phase="5">
+        <div class="phase-num">5</div>
+        <div>
+          <div class="phase-title">Resume Normal Flow</div>
+          <div class="phase-desc">Vehicle cleared. System returns to standard signal timing.</div>
+        </div>
+      </div>
     </div>
 
+    <div class="live-status" id="live-status">// awaiting simulation trigger</div>
 
-    <!-- LOG -->
-
-    <div class="card map-card">
-
-        <h2>📋 Live System Log</h2>
-
-        <div class="log" id="systemLog">
-
-            <p>
-                <strong>00:00:01</strong>
-                System initialized.
-            </p>
-
-            <p>
-                <strong>00:00:02</strong>
-                Traffic sensors connected.
-            </p>
-
-            <p>
-                <strong>00:00:03</strong>
-                AI decision engine ready.
-            </p>
-
-        </div>
-
-
-        <div class="buttons">
-
-            <button
-                class="emergency-btn"
-                onclick="simulateEmergency()">
-
-                🚨 SIMULATE EMERGENCY
-
-            </button>
-
-
-            <button
-                class="traffic-btn"
-                onclick="simulateTraffic()">
-
-                ⚠️ SIMULATE HEAVY TRAFFIC
-
-            </button>
-
-        </div>
-
+    <div class="log-panel">
+      <div class="panel-title" style="margin-bottom:8px;"><span><b>Event Log</b></span></div>
+      <div class="log-list" id="log-list"></div>
     </div>
+  </section>
 
-</div>
-
+</main>
 
 <footer>
-
-    ResQFlow AI • Smart Emergency Traffic Signal Automation
-
+  <div>Fail-safe: if no vehicle is confirmed post-clearance, protocol auto-cancels and reverts to normal timing.</div>
+  <div>Tech focus: rule-based signal logic · simulated IoT sensor trigger · real-time status logging</div>
 </footer>
 
-
 <script>
+const phaseItems = document.querySelectorAll('.phase-item');
+const liveStatus = document.getElementById('live-status');
+const logList = document.getElementById('log-list');
+const triggerBtn = document.getElementById('trigger-btn');
+const resetBtn = document.getElementById('reset-btn');
+const modeTag = document.getElementById('mode-tag');
+const ambulance = document.getElementById('ambulance');
+const ambBeacon = document.getElementById('amb-beacon');
+const radar = document.getElementById('radar');
 
-    let emergencyActive = false;
+const carsN = document.getElementById('cars-N');
+const carsE = document.getElementById('cars-E');
+const carsW = document.getElementById('cars-W');
+const carsS = document.getElementById('cars-S');
 
-    function addLog(message) {
+function bulb(lightId){
+  const g = document.getElementById(lightId);
+  return { red: g.querySelector('.bulb'), green: g.querySelector('.bulb-g') };
+}
+const lights = { N: bulb('light-N'), S: bulb('light-S'), E: bulb('light-E'), W: bulb('light-W') };
 
-        const log = document.getElementById("systemLog");
+function setLight(id, color){
+  const l = lights[id];
+  if(color === 'green'){
+    l.red.setAttribute('fill', '#3a1414');
+    l.green.setAttribute('fill', '#3ECF6E');
+    l.green.style.filter = 'drop-shadow(0 0 6px #3ECF6E)';
+  } else {
+    l.green.setAttribute('fill', '#123a1e');
+    l.green.style.filter = 'none';
+    l.red.setAttribute('fill', '#F0453A');
+    l.red.style.filter = 'drop-shadow(0 0 6px #F0453A)';
+  }
+}
+function resetAllLights(){
+  ['N','S','E','W'].forEach(function(id){
+    lights[id].red.setAttribute('fill', '#3a1414');
+    lights[id].red.style.filter='none';
+    lights[id].green.setAttribute('fill', '#123a1e');
+    lights[id].green.style.filter='none';
+  });
+  setLight('N','red'); setLight('S','red'); setLight('E','green'); setLight('W','green');
+}
 
-        const time = new Date().toLocaleTimeString();
+function log(msg, cls){
+  cls = cls || '';
+  const t = new Date().toLocaleTimeString('en-GB');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry ' + cls;
+  entry.innerHTML = '<span class="t">' + t + '</span><span>' + msg + '</span>';
+  logList.appendChild(entry);
+  logList.scrollTop = 0;
+}
 
-        const newLog = document.createElement("p");
+function setPhase(n){
+  phaseItems.forEach(function(item){
+    const p = parseInt(item.dataset.phase);
+    item.classList.remove('active','done');
+    if(p < n) item.classList.add('done');
+    if(p === n) item.classList.add('active');
+  });
+}
 
-        newLog.innerHTML =
-            "<strong>" + time + "</strong> " + message;
+function clockTick(){
+  document.getElementById('sim-clock').textContent = new Date().toLocaleTimeString('en-GB');
+}
+setInterval(clockTick, 1000); clockTick();
 
-        log.appendChild(newLog);
+let running = false;
 
-        log.scrollTop = log.scrollHeight;
+function resetSim(){
+  running = false;
+  triggerBtn.disabled = false;
+  modeTag.textContent = 'MODE: AUTO';
+  modeTag.style.color = 'var(--text-dim)';
+  setPhase(0);
+  liveStatus.textContent = '// awaiting simulation trigger';
+  liveStatus.style.color = 'var(--cyan)';
+  resetAllLights();
+  ambulance.setAttribute('opacity', 0);
+  ambulance.setAttribute('transform', 'translate(258,-70)');
+  radar.setAttribute('opacity', 0);
+  radar.setAttribute('r', 0);
+  [carsN, carsE, carsW, carsS].forEach(function(g){ g.setAttribute('opacity', 1); });
+  const startYs = [160,122,84,160,122];
+  carsN.querySelectorAll('rect').forEach(function(c,i){ c.setAttribute('y', startYs[i]); });
+  logList.innerHTML='';
+  log('System initialised. Standard fixed-time cycle running.', '');
+}
+
+function wait(ms){ return new Promise(function(res){ setTimeout(res, ms); }); }
+
+function animate(el, attr, from, to, duration){
+  return new Promise(function(resolve){
+    const start = performance.now();
+    function frame(now){
+      const t = Math.min(1, (now - start) / duration);
+      const val = from + (to - from) * t;
+      el.setAttribute(attr, val);
+      if(t < 1) requestAnimationFrame(frame);
+      else resolve();
     }
+    requestAnimationFrame(frame);
+  });
+}
 
-
-    function setSignal(signal, colour) {
-
-        document.getElementById(signal + "red")
-            .classList.remove("active");
-
-        document.getElementById(signal + "yellow")
-            .classList.remove("active");
-
-        document.getElementById(signal + "green")
-            .classList.remove("active");
-
-        document.getElementById(signal + colour)
-            .classList.add("active");
-
+function animateTemplate(el, attr, from, to, duration, template){
+  return new Promise(function(resolve){
+    const start = performance.now();
+    function frame(now){
+      const t = Math.min(1, (now - start) / duration);
+      const eased = t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
+      const val = from + (to - from) * eased;
+      el.setAttribute(attr, template.replace('{v}', val));
+      if(t < 1) requestAnimationFrame(frame);
+      else resolve();
     }
+    requestAnimationFrame(frame);
+  });
+}
 
+async function runSequence(){
+  running = true;
+  triggerBtn.disabled = true;
+  modeTag.textContent = 'MODE: OVERRIDE';
+  modeTag.style.color = 'var(--red)';
 
-    function simulateEmergency() {
+  // PHASE 1: Detection
+  setPhase(1);
+  liveStatus.textContent = 'Phase 1: Emergency vehicle detected — North approach, 500m out';
+  liveStatus.style.color = 'var(--amber)';
+  log('🚨 Ambulance detected on North approach (simulated sensor trigger).', 'warn');
+  ambulance.setAttribute('opacity', 1);
+  radar.setAttribute('opacity', 1);
+  animate(radar, 'r', 0, 260, 900);
+  await wait(1000);
 
-        if (emergencyActive) return;
+  // PHASE 2: Clearing phase — flush queued traffic ahead
+  setPhase(2);
+  liveStatus.textContent = 'Phase 2: Clearing forward traffic — flushing North lane...';
+  log('Signal control: North set to GREEN to flush queued traffic.', '');
+  setLight('N','green');
+  radar.setAttribute('opacity', 0);
+  const carRects = carsN.querySelectorAll('rect');
+  carRects.forEach(function(c){ animate(c, 'y', parseFloat(c.getAttribute('y')), -80, 900); });
+  await wait(1100);
+  carsN.setAttribute('opacity', 0);
+  log('North lane confirmed clear ahead of emergency vehicle.', 'ok');
+  await wait(400);
 
-        emergencyActive = true;
+  // PHASE 3: Cross traffic hold
+  setPhase(3);
+  liveStatus.textContent = 'Phase 3: Holding cross-traffic — East & West locked red';
+  log('Signal control: East & West forced to RED. Cross-traffic halted.', 'crit');
+  setLight('E','red'); setLight('W','red');
+  await wait(900);
 
-        document.getElementById("systemStatus")
-            .innerText = "🔴 EMERGENCY MODE ACTIVE";
+  // PHASE 4: Corridor open — ambulance passes through
+  setPhase(4);
+  liveStatus.textContent = 'Phase 4: 🟢 EMERGENCY CORRIDOR OPEN — vehicle passing through';
+  liveStatus.style.color = 'var(--green)';
+  log('Corridor open. Ambulance moving through intersection.', 'ok');
+  ambBeacon.style.filter = 'drop-shadow(0 0 6px #43D9C8)';
+  await animateTemplate(ambulance, 'transform', 258, 700, 1400, 'translate(258,{v})');
+  await wait(300);
 
-        document.getElementById("vehicleStatus")
-            .innerText = "DETECTED";
+  // PHASE 5: Resume normal
+  setPhase(5);
+  liveStatus.textContent = 'Phase 5: Vehicle cleared. Reverting to normal signal timing.';
+  liveStatus.style.color = 'var(--cyan)';
+  log('Sensors confirm vehicle has cleared intersection. Reverting to auto mode.', '');
+  await wait(700);
+  resetAllLights();
+  ambulance.setAttribute('opacity', 0);
+  modeTag.textContent = 'MODE: AUTO';
+  modeTag.style.color = 'var(--text-dim)';
+  log('Standard fixed-time cycle resumed.', '');
+  await wait(300);
+  liveStatus.textContent = '// cycle complete — trigger again to re-run simulation';
+  triggerBtn.disabled = false;
+  running = false;
+}
 
-        document.getElementById("eta")
-            .innerText = "42 seconds";
+triggerBtn.addEventListener('click', function(){ if(!running) runSequence(); });
+resetBtn.addEventListener('click', resetSim);
 
-        document.getElementById("decisionTitle")
-            .innerText = "EMERGENCY ROUTE ACTIVATED";
-
-        document.getElementById("decisionText")
-            .innerText =
-            "Ambulance detected. S2 has heavy traffic. " +
-            "AI is preparing an adaptive green corridor " +
-            "instead of blindly opening the intersection.";
-
-        addLog("🚑 Emergency vehicle detected.");
-
-        setTimeout(() => {
-
-            addLog("📍 Route calculated: S1 → S2 → S3.");
-
-            setSignal("s1", "green");
-
-        }, 1000);
-
-
-        setTimeout(() => {
-
-            addLog("📊 Heavy congestion detected at S2.");
-
-            setSignal("s2", "yellow");
-
-        }, 2000);
-
-
-        setTimeout(() => {
-
-            addLog("🤖 AI optimizing signal timing.");
-
-            setSignal("s2", "green");
-
-        }, 4000);
-
-
-        setTimeout(() => {
-
-            addLog("🟢 Emergency corridor activated.");
-
-            setSignal("s3", "green");
-
-        }, 6000);
-
-
-        setTimeout(() => {
-
-            document.getElementById("mapAmbulance")
-                .style.left = "82%";
-
-            addLog("🚑 Ambulance moving through emergency corridor.");
-
-        }, 7000);
-
-
-        setTimeout(() => {
-
-            addLog("✅ Ambulance cleared the route.");
-
-            document.getElementById("vehicleStatus")
-                .innerText = "CLEARED";
-
-            document.getElementById("eta")
-                .innerText = "ARRIVED";
-
-        }, 10000);
-
-
-        setTimeout(() => {
-
-            setSignal("s1", "red");
-            setSignal("s2", "red");
-            setSignal("s3", "red");
-
-            document.getElementById("systemStatus")
-                .innerText = "● SYSTEM ONLINE";
-
-            document.getElementById("decisionTitle")
-                .innerText = "NORMAL TRAFFIC RESTORED";
-
-            document.getElementById("decisionText")
-                .innerText =
-                    "Emergency vehicle cleared. " +
-                    "Traffic signals have returned to normal operation.";
-
-            addLog("🔄 Normal traffic operation restored.");
-
-            emergencyActive = false;
-
-        }, 13000);
-
-    }
-
-
-    function simulateTraffic() {
-
-        document.getElementById("s2Traffic")
-            .innerText = "95%";
-
-        document.getElementById("s2Bar")
-            .style.width = "95%";
-
-        document.getElementById("s2TrafficText")
-            .innerText = "SEVERE CONGESTION";
-
-        document.getElementById("decisionTitle")
-            .innerText = "⚠️ CONGESTION DETECTED";
-
-        document.getElementById("decisionText")
-            .innerText =
-                "Signal 2 has severe traffic congestion. " +
-                "The AI will delay the green phase and " +
-                "prepare an emergency lane before the ambulance arrives.";
-
-        addLog("⚠️ Severe congestion detected at Signal 2.");
-
-    }
-
+resetSim();
 </script>
 
 </body>
